@@ -118,23 +118,34 @@ WSGI_APPLICATION = 'fullfil.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/3.1/ref/settings/#databases
 
+# DATABASES = {
+#     'default': {
+#         'NAME': 'fullfil',
+#         'ENGINE': 'django.db.backends.mysql',
+#         'USER': 'root',
+#         'PASSWORD': 'r00t',
+#         'HOST': '127.0.0.1',
+#         'PORT':3306,
+#         'options':{
+#             'init_command': 'SET innodb_strict_mode=1',
+#             "threaded":True,
+#             'skip-ssl':True
+#         },
+#         'CONN_MAX_AGE': 0
+#     },
+# }
+
+
 DATABASES = {
     'default': {
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
         'NAME': 'fullfil',
-        'ENGINE': 'django.db.backends.mysql',
-        'USER': 'root',
-        'PASSWORD': 'r00t',
-        'HOST': '127.0.0.1',
-        'PORT':3306,
-        'options':{
-            'init_command': 'SET innodb_strict_mode=1',
-            "threaded":True,
-            'skip-ssl':True
-        },
-        'CONN_MAX_AGE': 0
-    },
+        'USER': '',
+        'PASSWORD': '',
+        'HOST': 'localhost',
+        'PORT': '',
+    }
 }
-
 
 # Password validation
 # https://docs.djangoproject.com/en/3.1/ref/settings/#auth-password-validators
