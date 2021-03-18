@@ -9,8 +9,11 @@ https://docs.djangoproject.com/en/3.1/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.1/ref/settings/
 """
+import os
 
 from pathlib import Path
+
+from corsheaders.defaults import default_methods, default_headers
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -25,7 +28,7 @@ SECRET_KEY = 'lkh(z*5sg(s3ef(1nwndi4u+f5ekzx9b#4%ad_zat&3xfe1kv7'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -39,9 +42,15 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 
     'app',
+
+    'channels',
+    'django_eventstream',
+    'corsheaders',
 ]
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
+    'django_grip.GripMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -50,6 +59,22 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+
+
+
+
+X_FRAME_OPTIONS ='ALLOW'
+
+
+CORS_ORIGIN_ALLOW_ALL = True
+
+CORS_ALLOW_METHODS = default_methods + (
+    'POKE',
+)
+
+CORS_ALLOW_CREDENTIALS = False
+
+CORS_ALLOW_HEADERS = default_headers + ('cache-control',)
 
 ROOT_URLCONF = 'fullfil.urls'
 
@@ -68,6 +93,24 @@ TEMPLATES = [
         },
     },
 ]
+
+
+
+ASGI_APPLICATION = 'fullfil.asgi.application'
+
+WSGI_APPLICATION = 'fullfil.wsgi.application'
+
+
+
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [("localhost", 6379)],
+        },
+    },
+    "ROUTING": "myproject.routing.channel_routing",
+}
 
 WSGI_APPLICATION = 'fullfil.wsgi.application'
 
@@ -137,3 +180,5 @@ CELERY_RESULT_BACKEND = 'redis://localhost:6379'
 CELERY_ACCEPT_CONTENT = ['application/json']
 CELERY_RESULT_SERIALIZER = 'json'
 CELERY_TASK_SERIALIZER = 'json'
+
+
