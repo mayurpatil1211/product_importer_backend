@@ -34,6 +34,7 @@ import csv
 import pandas as pd
 
 from app.tasks.product_creation import adding_task
+from app.tasks.delete_product_task import delete_task
 from app.tasks.webhook_task import webhook_logging
 
 from django_eventstream import send_event
@@ -84,11 +85,34 @@ class ProductListApiView(APIView):
 		query = request.GET.get('query')
 
 		if query:
-			product = Product.objects.filter(queue(sku__icontains=query)| queue(name__contains=query))[start:end]
+			product = Product.objects.filter(queue(sku__icontains=query)| queue(name__contains=query)).order_by('-id')[start:end]
 		else:
-			product = Product.objects.all()[start:end]
+			product = Product.objects.all().order_by('-id')[start:end]
 		serializer = ProductSerializer(product,many=True)
 		return JsonResponse({'message':'Product List', 'status':True, 'status_code':200, 'products':serializer.data, 'total_count':Product.objects.count()}, status=200)
+
+	def delete(self, request):
+		task = delete_task.delay()
+		return JsonResponse({'message':'Products are being deleted.', 'status':True, 'status_code':200}, status=200)
+
+	def post(self, request):
+		if request.data:
+			sku = request.data.get('sku')
+
+			product_exist = Product.objects.filter(sku=sku).last()
+			if product_exist:
+				serializer = ProductSerializer(product_exist, data=request.data)
+				if serializer.is_valid():
+					serializer.save()
+					return JsonResponse({'message':'Product already exist, Updating existing product.', 'status':True, 'status_code':200}, status=200)
+				return JsonResponse({'message':'Error during adding product, please check all the required fields.', 'status':False, 'status_code':400}, status=200)
+			else:
+				serializer = ProductSerializer(data=request.data)
+				if serializer.is_valid():
+					serializer.save()
+					return JsonResponse({'message':'Product added successfully.', 'status':True, 'status_code':200}, status=200)
+				return JsonResponse({'message':'Error during adding product, please check all the required fields.', 'status':False, 'status_code':400}, status=200)
+		return JsonResponse({'message':'Bad request, empty request.', 'status':False, 'status_code':200}, status=200)
 
 
 
